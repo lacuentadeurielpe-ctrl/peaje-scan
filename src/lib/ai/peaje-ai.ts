@@ -21,23 +21,28 @@ const SCHEMA: Schema = {
   properties: {
     fecha_documento: { type: SchemaType.STRING, description: 'Fecha de emisión de la boleta en formato DD/MM/YYYY' },
     numero_documento: { type: SchemaType.STRING, description: 'Número del comprobante, ej: A3T-326012163 (serie-correlativo)' },
-    ruc: { type: SchemaType.STRING, description: 'RUC del operador de peaje (11 dígitos)' },
+    ruc: { type: SchemaType.STRING, description: 'RUC del OPERADOR/EMISOR del peaje (la empresa que emite la boleta, ej. NORVIAL, COVISOL; suele estar arriba junto al nombre del peaje). NO el RUC del cliente/empresa de transporte que figure como comprador.' },
     tipo_comprobante: { type: SchemaType.STRING, description: 'Tipo de comprobante (Boleta, Factura, Ticket)' },
-    descripcion_gasto: { type: SchemaType.STRING, description: 'Descripción o concepto del gasto / estación de peaje' },
-    correlativo_lgv: { type: SchemaType.STRING, description: 'Correlativo LGV si aparece, ej: 001-39211' },
-    monto_pagado: { type: SchemaType.NUMBER, description: 'Monto total pagado en soles' },
-    monto_afecto: { type: SchemaType.NUMBER, description: 'Monto afecto a IGV (puede ser 0)' },
-    monto_no_afecto: { type: SchemaType.NUMBER, description: 'Monto inafecto / no gravado' },
-    monto_impuestos: { type: SchemaType.NUMBER, description: 'Total de impuestos (puede ser 0)' },
-    igv: { type: SchemaType.NUMBER, description: 'IGV desglosado si aparece' },
+    descripcion_gasto: { type: SchemaType.STRING, description: 'Estación/unidad de peaje o concepto del gasto' },
+    correlativo_lgv: { type: SchemaType.STRING, description: 'Correlativo interno LGV solo si aparece explícito (formato 001-39211); si no aparece, dejar vacío. NO usar aquí el número del comprobante.' },
+    monto_pagado: { type: SchemaType.NUMBER, description: 'Total a pagar (monto final cobrado, incluye detracción si la hubiera)' },
+    monto_afecto: { type: SchemaType.NUMBER, description: 'Subtotal afecto a IGV / base gravada (0 si el peaje es inafecto)' },
+    monto_no_afecto: { type: SchemaType.NUMBER, description: 'Importe inafecto / no gravado (0 si es afecto)' },
+    monto_impuestos: { type: SchemaType.NUMBER, description: 'Total de impuestos (normalmente igual al IGV; 0 si no hay)' },
+    igv: { type: SchemaType.NUMBER, description: 'Monto del IGV desglosado (0 si el peaje es inafecto)' },
   },
   required: ['fecha_documento', 'monto_pagado'],
 }
 
-const PROMPT = `Eres un experto en lectura de boletas y comprobantes de peaje peruanos.
-Extrae TODOS los datos visibles de esta boleta de peaje.
-El número de documento suele tener formato letra-número (ej: A3T-326012163).
-Si un campo no está visible, devuelve string vacío para texto o 0 para números.
+const PROMPT = `Eres un experto en lectura de boletas y facturas de peaje peruanas.
+Extrae los datos visibles de esta boleta de peaje.
+
+REGLAS IMPORTANTES:
+- RUC: usa el del OPERADOR DEL PEAJE (quien EMITE la boleta, ej. NORVIAL, COVISOL, normalmente arriba junto al nombre del peaje). Una boleta puede mostrar también el RUC del cliente/empresa de transporte como comprador: ESE NO se usa.
+- numero_documento: el número del comprobante en formato serie-correlativo (ej: F332-2229361, A3T-326012163).
+- Montos: monto_afecto = subtotal gravado; igv = IGV desglosado; monto_no_afecto = importe inafecto; monto_pagado = total a pagar final.
+- Si un campo no está visible, devuelve string vacío para texto o 0 para números.
+
 Devuelve exactamente el JSON con los campos solicitados.`
 
 async function intentarConGemini(base64: string, mimeType: string): Promise<DatosPeaje> {

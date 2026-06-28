@@ -35,7 +35,21 @@ export async function GET(req: NextRequest) {
   const filas = boletas.map(b => {
     const fin = (b.datos_finales ?? {}) as Record<string, unknown>
     const adel = (b.adelantos ?? {}) as Record<string, unknown>
+
+    // Campos compuestos como en el CSV de la empresa:
+    // Descripcion = "BUS {bus} {ruta} - LGV: {correlativo} - ADEL: {n_adelanto}"
+    // Descripcion_Gasto = "BUS {bus} {ruta}"
+    const bus = String(adel.bus ?? '').trim()
+    const ruta = String(adel.ruta ?? '').trim()
+    const lgv = String(fin.correlativo_lgv ?? '').trim()
+    const nAdel = String(adel.n_adelanto ?? '').trim()
+    const busRuta = [bus ? `BUS ${bus}` : '', ruta].filter(Boolean).join(' ').trim()
+    const descripcion = [busRuta, lgv ? `LGV: ${lgv}` : '', nAdel ? `ADEL: ${nAdel}` : '']
+      .filter(Boolean).join(' - ')
+
     return COLUMNAS_EXPORT.map(col => {
+      if (col.header === 'Descripcion') return descripcion
+      if (col.header === 'Descripcion_Gasto') return busRuta
       const fuente = col.origen === 'adelanto' ? adel : fin
       const val = fuente[col.key] ?? ''
       if (COLS_DINERO.has(col.header)) {
