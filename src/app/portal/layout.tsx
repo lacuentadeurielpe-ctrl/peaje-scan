@@ -4,23 +4,20 @@ import { createClient } from '@/lib/supabase/server'
 import Sidebar, { type NavItem } from '@/components/Sidebar'
 
 const NAV: NavItem[] = [
-  { href: '/dashboard', label: 'Inicio', icon: 'dashboard' },
-  { href: '/dashboard/adelantos', label: 'Adelantos', icon: 'adelantos' },
-  { href: '/dashboard/boletas', label: 'Boletas', icon: 'boletas' },
-  { href: '/dashboard/usuarios', label: 'Choferes', icon: 'usuarios' },
+  { href: '/portal', label: 'Mis Adelantos', icon: 'adelantos' },
 ]
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const perfil = await getPerfil()
   if (!perfil) redirect('/login')
-  if (perfil.rol !== 'superadmin') redirect('/portal')
+  if (perfil.rol !== 'chofer') redirect('/dashboard')
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar items={NAV} userEmail={user?.email ?? ''} badge="Superadmin" />
+      <Sidebar items={NAV} userEmail={user?.email ?? ''} badge="Chofer" />
       <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   )

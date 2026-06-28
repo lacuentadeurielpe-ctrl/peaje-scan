@@ -1,37 +1,37 @@
 import { GoogleGenerativeAI, SchemaType, Schema } from '@google/generative-ai'
 
+// Datos que la IA extrae de la imagen de la boleta de peaje.
 export interface DatosPeaje {
-  numero_boleta: string
-  serie: string
-  fecha: string
-  hora: string
-  estacion: string
-  ruta: string
-  placa: string
-  tipo_vehiculo: string
-  categoria: string
-  monto: number
-  numero_transaccion: string
-  empresa_peaje: string
+  fecha_documento: string
+  numero_documento: string
+  ruc: string
+  tipo_comprobante: string
+  descripcion_gasto: string
+  correlativo_lgv: string
+  monto_pagado: number
+  monto_afecto: number
+  monto_no_afecto: number
+  monto_impuestos: number
+  igv: number
+  [key: string]: string | number
 }
 
 const SCHEMA: Schema = {
   type: SchemaType.OBJECT,
   properties: {
-    numero_boleta: { type: SchemaType.STRING, description: 'Número de boleta o comprobante' },
-    serie: { type: SchemaType.STRING, description: 'Serie del documento' },
-    fecha: { type: SchemaType.STRING, description: 'Fecha en formato DD/MM/YYYY' },
-    hora: { type: SchemaType.STRING, description: 'Hora en formato HH:MM' },
-    estacion: { type: SchemaType.STRING, description: 'Nombre de la estación de peaje' },
-    ruta: { type: SchemaType.STRING, description: 'Ruta o tramo (ej: LIMA-TRUJILLO)' },
-    placa: { type: SchemaType.STRING, description: 'Placa del vehículo' },
-    tipo_vehiculo: { type: SchemaType.STRING, description: 'Tipo de vehículo (ej: Bus, Camión, Auto)' },
-    categoria: { type: SchemaType.STRING, description: 'Categoría vehicular (ej: C2, C3, B2)' },
-    monto: { type: SchemaType.NUMBER, description: 'Monto pagado en soles' },
-    numero_transaccion: { type: SchemaType.STRING, description: 'Número de transacción o referencia' },
-    empresa_peaje: { type: SchemaType.STRING, description: 'Empresa operadora del peaje' },
+    fecha_documento: { type: SchemaType.STRING, description: 'Fecha de emisión de la boleta en formato DD/MM/YYYY' },
+    numero_documento: { type: SchemaType.STRING, description: 'Número del comprobante, ej: A3T-326012163 (serie-correlativo)' },
+    ruc: { type: SchemaType.STRING, description: 'RUC del operador de peaje (11 dígitos)' },
+    tipo_comprobante: { type: SchemaType.STRING, description: 'Tipo de comprobante (Boleta, Factura, Ticket)' },
+    descripcion_gasto: { type: SchemaType.STRING, description: 'Descripción o concepto del gasto / estación de peaje' },
+    correlativo_lgv: { type: SchemaType.STRING, description: 'Correlativo LGV si aparece, ej: 001-39211' },
+    monto_pagado: { type: SchemaType.NUMBER, description: 'Monto total pagado en soles' },
+    monto_afecto: { type: SchemaType.NUMBER, description: 'Monto afecto a IGV (puede ser 0)' },
+    monto_no_afecto: { type: SchemaType.NUMBER, description: 'Monto inafecto / no gravado' },
+    monto_impuestos: { type: SchemaType.NUMBER, description: 'Total de impuestos (puede ser 0)' },
+    igv: { type: SchemaType.NUMBER, description: 'IGV desglosado si aparece' },
   },
-  required: ['fecha', 'monto'],
+  required: ['fecha_documento', 'monto_pagado'],
 }
 
 async function intentarConGemini(base64: string, mimeType: string): Promise<DatosPeaje> {
@@ -41,9 +41,10 @@ async function intentarConGemini(base64: string, mimeType: string): Promise<Dato
     generationConfig: { responseMimeType: 'application/json', responseSchema: SCHEMA },
   })
 
-  const prompt = `Eres un experto en lectura de boletas de peaje peruanas.
+  const prompt = `Eres un experto en lectura de boletas y comprobantes de peaje peruanos.
 Extrae TODOS los datos visibles de esta boleta de peaje.
-Si un campo no está visible, devuelve string vacío o 0 para números.
+El número de documento suele tener formato letra-número (ej: A3T-326012163).
+Si un campo no está visible, devuelve string vacío para texto o 0 para números.
 Devuelve exactamente el JSON con los campos solicitados.`
 
   const result = await model.generateContent([
@@ -51,15 +52,13 @@ Devuelve exactamente el JSON con los campos solicitados.`
     { inlineData: { data: base64, mimeType } },
   ])
 
-  const text = result.response.text()
-  return JSON.parse(text) as DatosPeaje
+  return JSON.parse(result.response.text()) as DatosPeaje
 }
 
 export async function extraerDatosPeaje(
   base64: string,
   mimeType: string = 'image/jpeg'
 ): Promise<{ datos: DatosPeaje; error: string | null }> {
-  // Reintentos con backoff ante errores 503
   for (let intento = 1; intento <= 3; intento++) {
     try {
       const datos = await intentarConGemini(base64, mimeType)
@@ -75,11 +74,4 @@ export async function extraerDatosPeaje(
     }
   }
   return { datos: {} as DatosPeaje, error: 'Error al procesar con Gemini' }
-}
-
-export function calcularPrecisionIA(datosIA: DatosPeaje, camposEditados: string[]): number {
-  const totalCampos = Object.keys(datosIA).length
-  if (totalCampos === 0) return 0
-  const editados = camposEditados.length
-  return Math.round(((totalCampos - editados) / totalCampos) * 100)
 }

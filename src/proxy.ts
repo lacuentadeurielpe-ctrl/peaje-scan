@@ -24,17 +24,18 @@ export async function proxy(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  if (!user && pathname.startsWith('/dashboard')) {
+  const rutaProtegida = pathname.startsWith('/dashboard') || pathname.startsWith('/portal')
+  if (!user && rutaProtegida) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   if (user && pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/portal/:path*', '/login'],
 }
