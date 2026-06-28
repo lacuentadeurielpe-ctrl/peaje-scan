@@ -2,12 +2,13 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { LayoutDashboard, Truck, FileText, LogOut, Route } from 'lucide-react'
+import { LayoutDashboard, Truck, FileText, LogOut, Route, Users } from 'lucide-react'
 
 const nav = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard },
   { href: '/dashboard/choferes', label: 'Choferes', icon: Truck },
   { href: '/dashboard/boletas', label: 'Boletas', icon: FileText },
+  { href: '/dashboard/usuarios', label: 'Usuarios', icon: Users },
 ]
 
 export default function Sidebar({ userEmail }: { userEmail: string }) {
