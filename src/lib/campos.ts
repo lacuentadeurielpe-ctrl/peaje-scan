@@ -23,12 +23,15 @@ export const CAMPOS_BOLETA: CampoBoleta[] = [
   { key: 'monto_no_afecto', label: 'Monto No Afecto', tipo: 'number' },
   { key: 'monto_impuestos', label: 'Monto Impuestos', tipo: 'number', default: '0' },
   { key: 'igv', label: 'IGV', tipo: 'number' },
+  // Detracción: se lee de la boleta (monto + código de constancia)
+  { key: 'monto_detraccion', label: 'Monto Detracción (S/)', tipo: 'number', default: '0' },
+  { key: 'constancia', label: 'Constancia (cód. detracción)', tipo: 'text' },
+  // Campos casi fijos: valor por defecto editable
+  { key: 'detraccion', label: 'Detracción (tipo)', tipo: 'text', default: 'Detr. Transport' },
   { key: 'tipo_impuesto', label: 'Tipo Impuesto', tipo: 'text' },
   { key: 'tipo_pago', label: 'Tipo Pago', tipo: 'text' },
   { key: 'concepto', label: 'Concepto', tipo: 'text' },
   { key: 'tipo_registro', label: 'Tipo Registro', tipo: 'text' },
-  { key: 'detraccion', label: 'Detracción', tipo: 'text', default: 'B' },
-  { key: 'constancia', label: 'Constancia', tipo: 'text', default: 'Detr. Transport' },
   { key: 'retencion', label: 'Retención', tipo: 'text' },
 ]
 

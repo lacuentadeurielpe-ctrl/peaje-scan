@@ -13,6 +13,8 @@ export interface DatosPeaje {
   monto_no_afecto: number
   monto_impuestos: number
   igv: number
+  monto_detraccion: number
+  constancia: string
   [key: string]: string | number
 }
 
@@ -30,6 +32,8 @@ const SCHEMA: Schema = {
     monto_no_afecto: { type: SchemaType.NUMBER, description: 'Importe inafecto / no gravado (0 si es afecto)' },
     monto_impuestos: { type: SchemaType.NUMBER, description: 'Total de impuestos (normalmente igual al IGV; 0 si no hay)' },
     igv: { type: SchemaType.NUMBER, description: 'Monto del IGV desglosado (0 si el peaje es inafecto)' },
+    monto_detraccion: { type: SchemaType.NUMBER, description: 'Monto de la detracción, ej. de la línea "Total por Detraccion" (0 si no hay)' },
+    constancia: { type: SchemaType.STRING, description: 'Código/constancia de detracción de la línea "Detraccion:", ej. A13320000738479 (vacío si no aparece)' },
   },
   required: ['fecha_documento', 'monto_pagado'],
 }
@@ -41,6 +45,7 @@ REGLAS IMPORTANTES:
 - RUC: usa el del OPERADOR DEL PEAJE (quien EMITE la boleta, ej. NORVIAL, COVISOL, normalmente arriba junto al nombre del peaje). Una boleta puede mostrar también el RUC del cliente/empresa de transporte como comprador: ESE NO se usa.
 - numero_documento: el número del comprobante en formato serie-correlativo (ej: F332-2229361, A3T-326012163).
 - Montos: monto_afecto = subtotal gravado; igv = IGV desglosado; monto_no_afecto = importe inafecto; monto_pagado = total a pagar final.
+- Detracción: monto_detraccion = el monto de "Total por Detraccion"; constancia = el código de la línea "Detraccion:" (ej. A13320000738479). Si la boleta no tiene detracción, deja 0 y vacío.
 - Si un campo no está visible, devuelve string vacío para texto o 0 para números.
 
 Devuelve exactamente el JSON con los campos solicitados.`
@@ -65,7 +70,7 @@ async function intentarConOpenAI(base64: string, mimeType: string): Promise<Dato
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) throw new Error('OPENAI_API_KEY no configurada')
 
-  const camposLista = 'fecha_documento, numero_documento, ruc, tipo_comprobante, descripcion_gasto, correlativo_lgv, monto_pagado, monto_afecto, monto_no_afecto, monto_impuestos, igv'
+  const camposLista = 'fecha_documento, numero_documento, ruc, tipo_comprobante, descripcion_gasto, correlativo_lgv, monto_pagado, monto_afecto, monto_no_afecto, monto_impuestos, igv, monto_detraccion, constancia'
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
