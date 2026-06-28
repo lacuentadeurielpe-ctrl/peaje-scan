@@ -1,4 +1,4 @@
-import BolетaScanner from '@/components/BolетaScanner'
+import BolетaScanner from '@/components/BoletaScanner'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export default async function NuevaBolетaPage() {

@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
-import BolетaDetalle from '@/components/BolетaDetalle'
+import BoletaDetalle from '@/components/BoletaDetalle'
 
 export default async function BolетaDetallePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -22,7 +22,7 @@ export default async function BolетaDetallePage({ params }: { params: Promise<
         <h1 className="text-2xl font-bold text-gray-900">Detalle de Boleta</h1>
         <p className="text-sm text-gray-500 mt-1">Edita, verifica o rechaza la boleta</p>
       </div>
-      <BolетaDetalle boleta={data} choferes={choferes ?? []} />
+      <BoletaDetalle boleta={data} choferes={choferes ?? []} />
     </div>
   )
 }

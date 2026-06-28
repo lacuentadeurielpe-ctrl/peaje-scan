@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import BolетasList from '@/components/BolетasList'
+import BoletasList from '@/components/BoletasList'
 
 export default async function BoletasPage() {
   const supabase = createAdminClient()
@@ -17,7 +17,7 @@ export default async function BoletasPage() {
         <h1 className="text-2xl font-bold text-gray-900">Boletas de Peaje</h1>
         <p className="text-sm text-gray-500 mt-1">Historial de boletas digitalizadas</p>
       </div>
-      <BolетasList initialBoletas={boletas ?? []} choferes={choferes ?? []} />
+      <BoletasList initialBoletas={boletas ?? []} choferes={choferes ?? []} />
     </div>
   )
 }
