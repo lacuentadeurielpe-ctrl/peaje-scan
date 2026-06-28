@@ -4,8 +4,9 @@ import { getPerfil } from '@/lib/auth'
 import { COLUMNAS_EXPORT } from '@/lib/campos'
 import ExcelJS from 'exceljs'
 
-// Columnas que llevan formato de dinero
-const COLS_DINERO = new Set(['Monto_Pagado', 'Monto_Afecto', 'Monto_No_Afecto', 'Monto_Impuestos', 'IGV'])
+// Columnas que llevan formato de dinero. (IGV es un código A/B, no monto;
+// Retencion ahora lleva el monto de la detracción.)
+const COLS_DINERO = new Set(['Monto_Pagado', 'Monto_Afecto', 'Monto_No_Afecto', 'Monto_Impuestos', 'Retencion'])
 // Columnas de fecha (se normalizan a DD/MM/YYYY como el CSV de la empresa)
 const COLS_FECHA = new Set(['Fecha_Documento', 'Fecha_Liquidacion'])
 

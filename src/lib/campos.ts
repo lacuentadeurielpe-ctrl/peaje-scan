@@ -19,20 +19,19 @@ export const CAMPOS_BOLETA: CampoBoleta[] = [
   { key: 'descripcion_gasto', label: 'Descripción Gasto', tipo: 'text' },
   { key: 'correlativo_lgv', label: 'Correlativo LGV', tipo: 'text' },
   { key: 'monto_pagado', label: 'Monto Pagado (S/)', tipo: 'number' },
-  { key: 'monto_afecto', label: 'Monto Afecto', tipo: 'number', default: '0' },
-  { key: 'monto_no_afecto', label: 'Monto No Afecto', tipo: 'number' },
-  { key: 'monto_impuestos', label: 'Monto Impuestos', tipo: 'number', default: '0' },
-  { key: 'igv', label: 'IGV', tipo: 'number' },
-  // Detracción: se lee de la boleta (monto + código de constancia)
-  { key: 'monto_detraccion', label: 'Monto Detracción (S/)', tipo: 'number', default: '0' },
+  { key: 'monto_afecto', label: 'Monto Afecto (S/)', tipo: 'number', default: '0' },
+  { key: 'monto_no_afecto', label: 'Monto No Afecto (S/)', tipo: 'number', default: '0' },
+  { key: 'igv', label: 'IGV monto (S/)', tipo: 'number', default: '0' }, // va a la columna Monto_Impuestos
+  // Detracción leída de la boleta
+  { key: 'monto_detraccion', label: 'Monto Detracción (S/)', tipo: 'number', default: '0' }, // va a la columna Retencion
   { key: 'constancia', label: 'Constancia (cód. detracción)', tipo: 'text' },
   // Campos casi fijos: valor por defecto editable
+  { key: 'codigo_igv', label: 'Código IGV (A=carga / B=personas)', tipo: 'text', default: 'B' }, // va a la columna IGV
   { key: 'detraccion', label: 'Detracción (tipo)', tipo: 'text', default: 'Detr. Transport' },
   { key: 'tipo_impuesto', label: 'Tipo Impuesto', tipo: 'text' },
   { key: 'tipo_pago', label: 'Tipo Pago', tipo: 'text' },
   { key: 'concepto', label: 'Concepto', tipo: 'text' },
   { key: 'tipo_registro', label: 'Tipo Registro', tipo: 'text' },
-  { key: 'retencion', label: 'Retención', tipo: 'text' },
 ]
 
 // Campos del adelanto (asignados por el superadmin)
@@ -78,9 +77,9 @@ export const COLUMNAS_EXPORT: { header: string; origen: 'adelanto' | 'boleta'; k
   { header: '# Documento', origen: 'boleta', key: 'numero_documento' },
   { header: 'Monto_Afecto', origen: 'boleta', key: 'monto_afecto' },
   { header: 'Monto_No_Afecto', origen: 'boleta', key: 'monto_no_afecto' },
-  { header: 'Monto_Impuestos', origen: 'boleta', key: 'monto_impuestos' },
-  { header: 'IGV', origen: 'boleta', key: 'igv' },
-  { header: 'Detraccion', origen: 'boleta', key: 'detraccion' },
-  { header: 'Constancia', origen: 'boleta', key: 'constancia' },
-  { header: 'Retencion', origen: 'boleta', key: 'retencion' },
+  { header: 'Monto_Impuestos', origen: 'boleta', key: 'igv' },         // monto del IGV
+  { header: 'IGV', origen: 'boleta', key: 'codigo_igv' },              // código A/B (no monto)
+  { header: 'Detraccion', origen: 'boleta', key: 'detraccion' },       // "Detr. Transport" / "No aplica"
+  { header: 'Constancia', origen: 'boleta', key: 'constancia' },       // código de detracción
+  { header: 'Retencion', origen: 'boleta', key: 'monto_detraccion' },  // monto de la detracción
 ]

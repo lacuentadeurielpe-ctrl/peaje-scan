@@ -54,6 +54,13 @@ export default function EscanerBoleta({ adelantoId, onClose }: { adelantoId: str
         ia[c.key] = v !== undefined && v !== null ? String(v) : ''
         fin[c.key] = ia[c.key] || c.default || ''
       }
+      // Reglas de detracción (según el formato de la empresa):
+      // - sin detracción -> Detracción = "No aplica"
+      // - con detracción pero sin código -> Constancia = "A"
+      const tieneDetraccion = Number(fin.monto_detraccion) > 0
+      if (!tieneDetraccion) fin.detraccion = 'No aplica'
+      else if (!fin.constancia) fin.constancia = 'A'
+
       setDatosIA(ia)
       setDatosFinal(fin)
       setImagenUrl(json.imagenUrl)
