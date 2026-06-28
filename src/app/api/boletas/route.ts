@@ -74,8 +74,11 @@ export async function GET(req: NextRequest) {
 // Convierte DD/MM/YYYY a YYYY-MM-DD; null si no es válida
 function parseFecha(f: unknown): string | null {
   if (!f || typeof f !== 'string') return null
-  const m = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
-  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`
+  const m = f.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}(?:\d{2})?)$/) // DD/MM/YY o DD/MM/YYYY
+  if (m) {
+    const anio = m[3].length === 2 ? `20${m[3]}` : m[3]
+    return `${anio}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`
+  }
   if (/^\d{4}-\d{2}-\d{2}$/.test(f)) return f
   return null
 }
