@@ -6,6 +6,18 @@ import ExcelJS from 'exceljs'
 
 // Columnas que llevan formato de dinero
 const COLS_DINERO = new Set(['Monto_Pagado', 'Monto_Afecto', 'Monto_No_Afecto', 'Monto_Impuestos', 'IGV'])
+// Columnas de fecha (se normalizan a DD/MM/YYYY como el CSV de la empresa)
+const COLS_FECHA = new Set(['Fecha_Documento', 'Fecha_Liquidacion'])
+
+function aDDMMYYYY(v: unknown): string {
+  const s = String(v ?? '').trim()
+  if (!s) return ''
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) // ISO YYYY-MM-DD
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/) // ya DD/MM/YYYY
+  if (m) return `${m[1].padStart(2, '0')}/${m[2].padStart(2, '0')}/${m[3]}`
+  return s
+}
 
 export async function GET(req: NextRequest) {
   const perfil = await getPerfil()
@@ -52,6 +64,7 @@ export async function GET(req: NextRequest) {
       if (col.header === 'Descripcion_Gasto') return busRuta
       const fuente = col.origen === 'adelanto' ? adel : fin
       const val = fuente[col.key] ?? ''
+      if (COLS_FECHA.has(col.header)) return aDDMMYYYY(val)
       if (COLS_DINERO.has(col.header)) {
         const n = Number(val)
         return val === '' || isNaN(n) ? '' : n
