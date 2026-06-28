@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CAMPOS_ADELANTO } from '@/lib/campos'
-import { Plus, Wallet, Loader2, X, ChevronRight } from 'lucide-react'
+import { Plus, Wallet, Loader2, X, ChevronRight, ChevronDown } from 'lucide-react'
 
 interface Chofer { id: string; nombre: string; placa_vehiculo: string | null }
 interface Adelanto {
@@ -27,6 +27,7 @@ export default function AdelantosManager({
   })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showExport, setShowExport] = useState(false)
 
   async function crear(e: React.FormEvent) {
     e.preventDefault()
@@ -52,23 +53,44 @@ export default function AdelantosManager({
             <h3 className="text-sm font-semibold text-gray-800">Nuevo adelanto</h3>
             <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Chofer *</label>
-            <select value={choferId} onChange={e => setChoferId(e.target.value)} required
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option value="">Selecciona un chofer</option>
-              {choferes.map(c => <option key={c.id} value={c.id}>{c.nombre}{c.placa_vehiculo ? ` — ${c.placa_vehiculo}` : ''}</option>)}
-            </select>
+          {/* Campos esenciales */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Chofer *</label>
+              <select value={choferId} onChange={e => setChoferId(e.target.value)} required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Selecciona un chofer</option>
+                {choferes.map(c => <option key={c.id} value={c.id}>{c.nombre}{c.placa_vehiculo ? ` — ${c.placa_vehiculo}` : ''}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Monto Asignado (S/) *</label>
+              <input type="number" step="0.01" value={form.monto_asignado ?? ''}
+                onChange={e => setForm(prev => ({ ...prev, monto_asignado: e.target.value }))}
+                placeholder="Dinero que le das al chofer"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {CAMPOS_ADELANTO.map(({ key, label, tipo }) => (
-              <div key={key}>
-                <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
-                <input type={tipo === 'date' ? 'date' : tipo} value={form[key] ?? ''}
-                  onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+          {/* Datos para exportación (opcional) */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <button type="button" onClick={() => setShowExport(v => !v)}
+              className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors">
+              <span className="text-sm font-medium text-gray-600">Datos para exportación (opcional)</span>
+              <ChevronDown size={16} className={`text-gray-400 transition-transform ${showExport ? 'rotate-180' : ''}`} />
+            </button>
+            {showExport && (
+              <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                {CAMPOS_ADELANTO.filter(c => c.key !== 'monto_asignado').map(({ key, label, tipo }) => (
+                  <div key={key}>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                    <input type={tipo === 'date' ? 'date' : tipo} value={form[key] ?? ''}
+                      onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
           <div className="flex justify-end gap-3">
             <button type="button" onClick={() => setShowForm(false)} className="border border-gray-300 text-gray-700 rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-50">Cancelar</button>
